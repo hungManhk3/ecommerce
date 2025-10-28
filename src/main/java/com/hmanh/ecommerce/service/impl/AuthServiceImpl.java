@@ -51,6 +51,7 @@ public class AuthServiceImpl implements AuthService {
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SINGER_KEY;
+    private static final String SELLER_PERFIX = "seller_";
 
     @Override
     public void sentLoginOtp(OtpRequest request) throws Exception {
@@ -85,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
                 Seller seller = sellerRepository.findByEmail(request.getEmail());
                 if (seller != null){
                     verificationCode.setSeller(seller);
-                    verificationCode.setSeller(null);
+                    verificationCode.setUser(null);
                 }
             }
             verificationCodeRepository.save(verificationCode);
@@ -149,7 +150,7 @@ public class AuthServiceImpl implements AuthService {
         if(userDetails == null) {
             throw new BadCredentialsException("Invalid username or password");
         }
-        VerificationCode verificationCode = verificationCodeRepository.findByEmail(username);
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(userDetails.getUsername());
         if (verificationCode == null ||  !verificationCode.getOtp().equals(otp)) {
             throw new BadCredentialsException("wrong email or password");
         }

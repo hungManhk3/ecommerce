@@ -7,6 +7,7 @@ import com.hmanh.ecommerce.dto.request.LoginRequest;
 import com.hmanh.ecommerce.dto.request.OtpRequest;
 import com.hmanh.ecommerce.dto.response.ApiResponse;
 import com.hmanh.ecommerce.dto.response.AuthResponse;
+import com.hmanh.ecommerce.exception.SellerException;
 import com.hmanh.ecommerce.repository.VerificationCodeRepository;
 import com.hmanh.ecommerce.service.AuthService;
 import com.hmanh.ecommerce.service.EmailService;
@@ -33,10 +34,10 @@ public class SellerController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginSeller (@RequestBody LoginRequest request) throws Exception {
 
-    String otp = request.getOtp();
-    String email =  request.getEmail();
+        String otp = request.getOtp();
+        String email =  request.getEmail();
 
-    VerificationCode verificationCode = verificationCodeRepository.findByEmail(email);
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(email);
     if (verificationCode == null || !verificationCode.getOtp().equals(otp)) {
         throw  new Exception("Invalid OTP");
     }
@@ -60,7 +61,7 @@ public class SellerController {
         return ResponseEntity.ok(newSeller).getBody();
     }
 
-    @PostMapping("/verifi/{otp}")
+    @PostMapping("/verify/{otp}")
     public ResponseEntity<Seller> verificationSellerEmail(@PathVariable String otp) throws Exception {
         VerificationCode verificationCode = verificationCodeRepository.findByOtp(otp);
         if (verificationCode == null || !verificationCode.getOtp().equals(otp)) {
@@ -71,7 +72,7 @@ public class SellerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Seller> getSellerById(@PathVariable Long id) throws Exception {
+    public ResponseEntity<Seller> getSellerById(@PathVariable Long id) throws SellerException {
         Seller seller = sellerService.getSellerById(id);
         return new ResponseEntity<>(seller,HttpStatus.OK);
     }

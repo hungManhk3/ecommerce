@@ -4,6 +4,7 @@ import com.hmanh.ecommerce.Entity.Address;
 import com.hmanh.ecommerce.Entity.Seller;
 import com.hmanh.ecommerce.domain.AccountStatus;
 import com.hmanh.ecommerce.domain.USER_ROLE;
+import com.hmanh.ecommerce.exception.SellerException;
 import com.hmanh.ecommerce.repository.AddressRepository;
 import com.hmanh.ecommerce.repository.SellerRepository;
 import com.hmanh.ecommerce.service.AuthService;
@@ -77,10 +78,10 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public Seller getSellerById(Long id) throws Exception{
+    public Seller getSellerById(Long id) throws SellerException{
         Seller seller = sellerRepository.findSellerById(id);
         if (seller == null) {
-            throw new Exception("seller not found");
+            throw new SellerException("seller not found");
         }
         return seller;
     }
