@@ -7,6 +7,7 @@ import com.hmanh.ecommerce.dto.request.CreateProductRequest;
 import com.hmanh.ecommerce.exception.ProductException;
 import com.hmanh.ecommerce.repository.CategoryRepository;
 import com.hmanh.ecommerce.repository.ProductRepository;
+import com.hmanh.ecommerce.service.FileUploadService;
 import com.hmanh.ecommerce.service.ProductService;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,8 +30,11 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final FileUploadService fileUploadService;
+
     @Override
     public Product createProduct(CreateProductRequest request, Seller seller) {
+//        String imgUml = fileUploadService.upload(file);
         Category category1 = categoryRepository.findByCategoryId(request.getCategory());
         if  (category1 == null) {
             Category category = new Category();
@@ -67,6 +72,7 @@ public class ProductServiceImpl implements ProductService {
         product.setMrqPrice(request.getMrpPrice());
         product.setSize(request.getSizes());
         product.setDiscountPercent(discountPercentage);
+        product.setBrand(request.getBrand());
         return productRepository.save(product);
     }
 
@@ -77,8 +83,65 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product updateProduct(Long productId, Product product) {
-        return null;
+    public Product updateProduct(Long productId, Product updatedProduct) throws ProductException {
+        try {
+            Product existingProduct = productRepository.findById(productId)
+                    .orElseThrow(() -> new ProductException("Product not found with id: " + productId));
+
+            if (updatedProduct.getTitle() != null) {
+                existingProduct.setTitle(updatedProduct.getTitle());
+            }
+
+            if (updatedProduct.getDescription() != null) {
+                existingProduct.setDescription(updatedProduct.getDescription());
+            }
+
+            if (updatedProduct.getColor() != null) {
+                existingProduct.setColor(updatedProduct.getColor());
+            }
+
+            if (updatedProduct.getSize() != null) {
+                existingProduct.setSize(updatedProduct.getSize());
+            }
+
+            if (updatedProduct.getBrand() != null) {
+                existingProduct.setBrand(updatedProduct.getBrand());
+            }
+
+            // Update prices and recalculate discount if either price changes
+            if (updatedProduct.getMrqPrice() > 0) {
+                existingProduct.setMrqPrice(updatedProduct.getMrqPrice());
+            }
+
+            if (updatedProduct.getSellingPrice() > 0) {
+                existingProduct.setSellingPrice(updatedProduct.getSellingPrice());
+            }
+
+            // Recalculate discount percentage if prices were updated
+            if (updatedProduct.getMrqPrice() > 0 || updatedProduct.getSellingPrice() > 0) {
+                int discountPercentage = calculateDiscountPercentage(
+                        existingProduct.getMrqPrice(),
+                        existingProduct.getSellingPrice()
+                );
+                existingProduct.setDiscountPercent(discountPercentage);
+            }
+
+            if (updatedProduct.getQuantity() >= 0) {
+                existingProduct.setQuantity(updatedProduct.getQuantity());
+            }
+
+            if (updatedProduct.getImages() != null && !updatedProduct.getImages().isEmpty()) {
+                existingProduct.setImages(updatedProduct.getImages());
+            }
+            if (updatedProduct.getCategory() != null) {
+                existingProduct.setCategory(updatedProduct.getCategory());
+            }
+
+            return productRepository.save(existingProduct);
+
+        } catch (Exception e) {
+            throw new ProductException("Error updating product: " + e.getMessage());
+        }
     }
 
     @Override
@@ -87,8 +150,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> getAllProducts() {
-        return List.of();
+    public List<Product> getAllProducts(String query) {
+        return productRepository.searchProduct(query);
     }
 
     @Override
@@ -100,8 +163,8 @@ public class ProductServiceImpl implements ProductService {
                 Join<Product, Category> categoryJoin = root.join("category", JoinType.INNER);
                 predicates.add(criteriaBuilder.equal(categoryJoin.get("categoryId"), category));
             }
-            if (brand != null) {
-
+            if (brand != null && !brand.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("brand"), brand));
             }
             if (colors != null) {
                 predicates.add(criteriaBuilder.equal(root.get("color"), colors));
@@ -123,20 +186,35 @@ public class ProductServiceImpl implements ProductService {
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         });
-        Pageable pageable1;
         if (sort != null && !sort.isEmpty()) {
+            int page = pageNumber != null ? pageNumber : 0;
+            int size = pageable.getPageSize();
+
             switch (sort) {
                 case "price_low":
-                    pageable1 = PageRequest.of(pageNumber!=null? pageNumber : 0, 10, Sort.by("sellingPrice").ascending());
+                    pageable = PageRequest.of(page, size, Sort.by("sellingPrice").ascending());
                     break;
+                case "price_high": // Fixed typo
+                    pageable = PageRequest.of(page, size, Sort.by("sellingPrice").descending());
+                    break;
+                case "newest":
+                    pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+                    break;
+                case "popular":
+                    pageable = PageRequest.of(page, size, Sort.by("numRatings").descending());
+                    break;
+                default:
+                    pageable = PageRequest.of(page, size, Sort.by("id").descending());
             }
+        } else {
+            pageable = PageRequest.of(pageNumber != null ? pageNumber : 0, 10, Sort.by("id").descending());
         }
-        return null;
+        return productRepository.findAll(specification, pageable);
     }
 
     @Override
     public List<Product> getProductsBySellerId(Long sellerId) {
-        return List.of();
+        return productRepository.findBySellerId(sellerId);
     }
     Integer calculateDiscountPercentage(double mrpPrice, double sellingPrice) {
         if (mrpPrice <= 0 || sellingPrice <= 0) {

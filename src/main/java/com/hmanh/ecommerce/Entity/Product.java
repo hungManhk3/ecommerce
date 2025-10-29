@@ -23,6 +23,7 @@ public class Product {
     private int sellingPrice;
     private int discountPercent;
     private int quantity;
+    private String brand;
     private String color;
     @ElementCollection
     private List<String> images = new ArrayList<>();
