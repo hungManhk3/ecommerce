@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Table(name = "orders")
-public class Order {
+public class Order extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,7 +30,7 @@ public class Order {
     private Address address;
     @Embedded
     private PaymentDetails paymentDetails = new PaymentDetails();
-    private double totalMrpPrice;
+    private Integer totalMrpPrice;
     private Integer totalSellingPrice;
     private Integer discount;
     private OrderStatus orderStatus;

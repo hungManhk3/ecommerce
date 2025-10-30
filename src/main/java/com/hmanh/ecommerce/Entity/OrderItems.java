@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderItems {
+public class OrderItems extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,5 +24,4 @@ public class OrderItems {
     private int quantity;
     private Integer mrpPrice;
     private Integer sellingPrice;
-    private Long userId;
 }

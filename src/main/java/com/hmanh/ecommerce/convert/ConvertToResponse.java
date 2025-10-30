@@ -1,11 +1,13 @@
 package com.hmanh.ecommerce.convert;
 
 import com.hmanh.ecommerce.Entity.*;
+import com.hmanh.ecommerce.domain.OrderStatus;
 import com.hmanh.ecommerce.dto.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -185,6 +187,85 @@ public class ConvertToResponse {
                 .expired(expired)
                 .usable(usable)
                 .build();
+    }
+    public OrderResponse convertToOrderResponse(Order order) {
+        if (order == null) return null;
+
+        LocalDateTime now = LocalDateTime.now();
+        boolean isDelivered = order.getDeliveryDate() != null &&
+                now.isAfter(order.getDeliveryDate());
+        boolean canCancel = order.getOrderStatus() == OrderStatus.PENDING ||
+                order.getOrderStatus() == OrderStatus.CONFIRMED;
+
+        return OrderResponse.builder()
+                .id(order.getId())
+                .orderId(order.getOrderId())
+                .user(convertToUserResponse(order.getUser()))
+                .sellerId(order.getSellerId())
+//                .seller(convertToSellerResponse(order.)) // Cần thêm relation
+                .orderItems(convertToOrderItemResponseList(order.getOrderItems()))
+                .address(convertToAddressResponse(order.getAddress()))
+                .paymentDetails(convertToPaymentDetailsResponse(order.getPaymentDetails()))
+                .totalMrpPrice(order.getTotalMrpPrice())
+                .totalSellingPrice(order.getTotalSellingPrice())
+                .discount(order.getDiscount())
+                .orderStatus(order.getOrderStatus())
+                .totalItem(order.getTotalItem())
+                .paymentStatus(order.getPaymentStatus())
+                .orderDate(order.getOrderDate())
+                .deliveryDate(order.getDeliveryDate())
+                .createdAt(order.getCreatedDate())
+                .updatedAt(order.getModifiedDate())
+                .build();
+    }
+
+    public OrderItemResponse convertToOrderItemResponse(OrderItems orderItem) {
+        if (orderItem == null) return null;
+
+        int totalMrpPrice = (orderItem.getMrpPrice() != null ? orderItem.getMrpPrice() : 0) * orderItem.getQuantity();
+        int totalSellingPrice = (orderItem.getSellingPrice() != null ? orderItem.getSellingPrice() : 0) * orderItem.getQuantity();
+        int discount = Math.max(0, totalMrpPrice - totalSellingPrice);
+
+        return OrderItemResponse.builder()
+                .id(orderItem.getId())
+                .product(convertToProductResponse(orderItem.getProduct()))
+                .size(orderItem.getSize())
+                .quantity(orderItem.getQuantity())
+                .mrpPrice(orderItem.getMrpPrice())
+                .sellingPrice(orderItem.getSellingPrice())
+                .totalMrpPrice(totalMrpPrice)
+                .totalSellingPrice(totalSellingPrice)
+                .discount(discount)
+                .userId(orderItem.getOrder().getUser().getId())
+                .createdAt(orderItem.getCreatedDate())
+                .updatedAt(orderItem.getModifiedDate())
+                .build();
+    }
+
+    public List<OrderItemResponse> convertToOrderItemResponseList(List<OrderItems> orderItems) {
+        if (orderItems == null) return new ArrayList<>();
+
+        return orderItems.stream()
+                .map(this::convertToOrderItemResponse)
+                .collect(Collectors.toList());
+    }
+
+    public PaymentDetailsResponse convertToPaymentDetailsResponse(PaymentDetails paymentDetails) {
+        if (paymentDetails == null) return null;
+
+        return null;
+    }
+
+    // Method để convert Page<Order> thành Page<OrderResponse>
+    public Page<OrderResponse> convertToOrderResponsePage(Page<Order> orderPage) {
+        return orderPage.map(this::convertToOrderResponse);
+    }
+
+    // Method để convert List<Order> thành List<OrderResponse>
+    public List<OrderResponse> convertToOrderResponseList(List<Order> orders) {
+        return orders.stream()
+                .map(this::convertToOrderResponse)
+                .collect(Collectors.toList());
     }
     public Set<AddressResponse> convertToAddressResponseSet(Set<Address> addresses) {
         if (addresses == null) return Set.of();
