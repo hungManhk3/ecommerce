@@ -6,6 +6,8 @@ import com.hmanh.ecommerce.Entity.Product;
 import com.hmanh.ecommerce.Entity.User;
 import com.hmanh.ecommerce.dto.request.AddItemRequest;
 import com.hmanh.ecommerce.dto.response.ApiResponse;
+import com.hmanh.ecommerce.dto.response.CartItemResponse;
+import com.hmanh.ecommerce.dto.response.CartResponse;
 import com.hmanh.ecommerce.exception.ProductException;
 import com.hmanh.ecommerce.service.CartItemService;
 import com.hmanh.ecommerce.service.CartService;
@@ -26,22 +28,19 @@ public class CartController {
     private final ProductService productService;
 
     @GetMapping
-    public ResponseEntity<Cart> findUserCartHandler(@RequestHeader("Authorization") String jwt) throws Exception {
+    public ResponseEntity<CartResponse> findUserCartHandler(@RequestHeader("Authorization") String jwt) throws Exception {
         User user = userService.findUserByJwtToken(jwt);
-        Cart cart = cartService.findUserCart(user);
+        CartResponse cart = cartService.findUserCart(user);
         System.out.println(cart.getUser().getEmail());
-        return new ResponseEntity<Cart>(cart, HttpStatus.OK);
+        return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<CartItem> addItemToCart(@RequestHeader("Authorization") String jwt, @RequestBody AddItemRequest request) throws Exception {
+    public ResponseEntity<CartItemResponse> addItemToCart(@RequestHeader("Authorization") String jwt, @RequestBody AddItemRequest request) throws Exception {
         User user = userService.findUserByJwtToken(jwt);
-        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductException("product not found"));
-
-        CartItem item = cartService.addCartItem(user,product,request.getSize(), request.getQuantity());
+        CartItemResponse item = cartService.addCartItem(user, request);
         ApiResponse response = new ApiResponse();
         response.setMessage("success");
-
         return new ResponseEntity<>(item, HttpStatus.ACCEPTED);
     }
 
@@ -55,13 +54,13 @@ public class CartController {
     }
 
     @PostMapping("/item/{cartItemId}")
-    public ResponseEntity<CartItem> UpdateCartItemHandler(
+    public ResponseEntity<CartItemResponse> UpdateCartItemHandler(
             @RequestHeader("Authorization") String jwt,
             @RequestBody CartItem cartItem,
             @PathVariable Long cartItemId
     ) throws Exception {
         User user = userService.findUserByJwtToken(jwt);
-        CartItem updateCartItem = null;
+        CartItemResponse updateCartItem = null;
         if (cartItem.getQuantity() > 0){
             updateCartItem = cartItemService.updateCartItem(user.getId(), cartItemId, cartItem);
         }
