@@ -2,6 +2,8 @@ package com.hmanh.ecommerce.service.impl;
 
 import com.hmanh.ecommerce.Entity.CartItem;
 import com.hmanh.ecommerce.Entity.User;
+import com.hmanh.ecommerce.convert.ConvertToResponse;
+import com.hmanh.ecommerce.dto.response.CartItemResponse;
 import com.hmanh.ecommerce.repository.CartItemRepository;
 import com.hmanh.ecommerce.service.CartItemService;
 import jakarta.el.ELException;
@@ -13,9 +15,10 @@ import org.springframework.stereotype.Service;
 public class CartItemServiceImpl implements CartItemService {
 
     private final CartItemRepository cartItemRepository;
+    private final ConvertToResponse convertToResponse;
 
     @Override
-    public CartItem updateCartItem(Long userId, Long id, CartItem cartItem) throws Exception {
+    public CartItemResponse updateCartItem(Long userId, Long id, CartItem cartItem) throws Exception {
         CartItem item = findCartItemById(id);
 
         User cartItemUser = item.getCart().getUser();
@@ -24,7 +27,8 @@ public class CartItemServiceImpl implements CartItemService {
             item.setQuantity(cartItem.getQuantity());
             item.setMrpPrice(item.getQuantity() * item.getProduct().getMrqPrice());
             item.setSellingPrice(item.getQuantity() * item.getProduct().getSellingPrice());
-            return cartItemRepository.save(item);
+            cartItemRepository.save(item);
+            return convertToResponse.convertToCartItemResponse(item);
         }
         else throw new Exception("you cant update this cartItem");
     }
