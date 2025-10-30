@@ -201,65 +201,6 @@ public class ProductServiceImpl implements ProductService {
 
         return convertToResponse.convertToProductResponsePage(productPage);
     }
-
-//    @Override
-//    public Page<ProductResponse> searchProducts(String category, String brand, String colors, String sizes, Integer minPrice, Integer maxPrice, Integer minDiscount, String sort, String stock, Integer pageNumber, Pageable pageable) {
-//        Specification<Product> specification = ((root, query, criteriaBuilder) -> {
-//            List<Predicate> predicates = new ArrayList<>();
-//
-//            if (category != null) {
-//                Join<Product, Category> categoryJoin = root.join("category", JoinType.INNER);
-//                predicates.add(criteriaBuilder.equal(categoryJoin.get("categoryId"), category));
-//            }
-//            if (brand != null && !brand.isEmpty()) {
-//                predicates.add(criteriaBuilder.equal(root.get("brand"), brand));
-//            }
-//            if (colors != null) {
-//                predicates.add(criteriaBuilder.equal(root.get("color"), colors));
-//            }
-//            if (sizes != null) {
-//                predicates.add(criteriaBuilder.equal(root.get("size"), sizes));
-//            }
-//            if (minPrice != null) {
-//                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("sellingPrice"), minPrice));
-//            }
-//            if (maxPrice != null) {
-//                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("sellingPrice"), maxPrice));
-//            }
-//            if (minDiscount != null) {
-//                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("discountPercent"), minDiscount));
-//            }
-//            if (stock != null) {
-//                predicates.add(criteriaBuilder.equal(root.get("stock"), stock));
-//            }
-//            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-//        });
-//        if (sort != null && !sort.isEmpty()) {
-//            int page = pageNumber != null ? pageNumber : 0;
-//            int size = pageable.getPageSize();
-//
-//            switch (sort) {
-//                case "price_low":
-//                    pageable = PageRequest.of(page, size, Sort.by("sellingPrice").ascending());
-//                    break;
-//                case "price_high": // Fixed typo
-//                    pageable = PageRequest.of(page, size, Sort.by("sellingPrice").descending());
-//                    break;
-//                case "newest":
-//                    pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-//                    break;
-//                case "popular":
-//                    pageable = PageRequest.of(page, size, Sort.by("numRatings").descending());
-//                    break;
-//                default:
-//                    pageable = PageRequest.of(page, size, Sort.by("id").descending());
-//            }
-//        } else {
-//            pageable = PageRequest.of(pageNumber != null ? pageNumber : 0, 10, Sort.by("id").descending());
-//        }
-//        return productRepository.findAll(specification, pageable);
-//    }
-
     @Override
     public List<ProductResponse> getProductsBySellerId(Long sellerId) throws SellerException {
         if (!sellerRepository.existsById(sellerId)) {
