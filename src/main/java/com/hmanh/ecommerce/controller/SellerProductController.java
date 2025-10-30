@@ -3,7 +3,10 @@ package com.hmanh.ecommerce.controller;
 import com.hmanh.ecommerce.Entity.Product;
 import com.hmanh.ecommerce.Entity.Seller;
 import com.hmanh.ecommerce.dto.request.CreateProductRequest;
+import com.hmanh.ecommerce.dto.request.UpdateProductRequest;
+import com.hmanh.ecommerce.dto.response.ProductResponse;
 import com.hmanh.ecommerce.exception.ProductException;
+import com.hmanh.ecommerce.exception.SellerException;
 import com.hmanh.ecommerce.service.ProductService;
 import com.hmanh.ecommerce.service.SellerService;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +24,14 @@ public class SellerProductController {
     private final SellerService sellerService;
 
     @PostMapping()
-    public ResponseEntity<Product> createProduct(@RequestBody CreateProductRequest request, @RequestHeader("Authorization") String jwt) throws Exception {
+    public ResponseEntity<ProductResponse> createProduct(@RequestBody CreateProductRequest request, @RequestHeader("Authorization") String jwt) throws Exception {
         Seller seller = sellerService.getSellerProfile(jwt);
-        Product product = productService.createProduct(request, seller);
-        return ResponseEntity.ok().body(product);
+        try {
+            ProductResponse productResponse = productService.createProduct(request, seller);
+            return ResponseEntity.status(HttpStatus.CREATED).body(productResponse);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -40,10 +47,11 @@ public class SellerProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProductById(@PathVariable Long id, @RequestBody Product product) throws Exception {
+    public ResponseEntity<ProductResponse> updateProductById(@PathVariable Long id, @RequestBody UpdateProductRequest request, @RequestHeader("Authorization") String jwt) throws Exception {
+        Seller seller = sellerService.getSellerProfile(jwt);
         try {
-            productService.updateProduct(id, product);
-            return new ResponseEntity<>(product, HttpStatus.OK);
+            ProductResponse productResponse = productService.updateProduct(id, request, seller);
+            return ResponseEntity.ok(productResponse);
         }
         catch (ProductException pe) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -51,8 +59,8 @@ public class SellerProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<Product>> getProductsBySellerId(@PathVariable Long id) {
-        List<Product> products = productService.getProductsBySellerId(id);
+    public ResponseEntity<List<ProductResponse>> getProductsBySellerId(@PathVariable Long id) throws SellerException {
+        List<ProductResponse> products = productService.getProductsBySellerId(id);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 }

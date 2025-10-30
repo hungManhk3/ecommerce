@@ -2,6 +2,7 @@ package com.hmanh.ecommerce.controller;
 
 import com.hmanh.ecommerce.Entity.Product;
 import com.hmanh.ecommerce.dto.response.ApiResponse;
+import com.hmanh.ecommerce.dto.response.ProductResponse;
 import com.hmanh.ecommerce.exception.ProductException;
 import com.hmanh.ecommerce.repository.ProductRepository;
 import com.hmanh.ecommerce.service.ProductService;
@@ -21,35 +22,19 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/{productId}")
-    public Product getProductById(@PathVariable("productId") Long productId) throws ProductException {
-        Product product = productService.getProductById(productId);
-        return new ResponseEntity<>(product, HttpStatus.OK).getBody();
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable("productId") Long productId) throws ProductException {
+        ProductResponse productResponse = productService.getProductById(productId);
+        return ResponseEntity.ok(productResponse);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Product>> searchProducts(@RequestParam(required = false) String query) {
+    @GetMapping()
+    public ResponseEntity<List<Product>> getProducts(@RequestParam(required = false) String query) {
         List<Product> products = productService.getAllProducts(query);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-//    @GetMapping
-//    public ResponseEntity<Page<Product>> getAllProducts(
-//            @RequestParam(required = false) String category,
-//            @RequestParam(required = false) String brand,
-//            @RequestParam(required = false) String color,
-//            @RequestParam(required = false) String size,
-//            @RequestParam(required = false) Integer minPrice,
-//            @RequestParam(required = false) Integer maxPrice,
-//            @RequestParam(required = false) Integer minDiscount,
-//            @RequestParam(required = false) String sort,
-//            @RequestParam(required = false) String stock,
-//            @RequestParam(defaultValue = "0") Integer pageNumber
-//            ) {
-//        return new ResponseEntity<>()
-//    }
-
-    @GetMapping()
-    ApiResponse<List<Product>> getRoles(
+    @GetMapping("/search")
+    public ApiResponse<List<ProductResponse>> searchProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) String color,
@@ -59,11 +44,10 @@ public class ProductController {
             @RequestParam(required = false) Integer minDiscount,
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String stock,
-            @RequestParam(defaultValue = "0") Integer pageNumber,
             Pageable pageable){
-        Page<Product> page = productService.searchProducts(category, brand, color, size, minPrice, maxPrice, minDiscount, sort, stock, pageNumber, pageable);
+        Page<ProductResponse> page = productService.searchProducts(category, brand, color, size, minPrice, maxPrice, minDiscount, sort, stock, pageable);
 
-        return ApiResponse.<List<Product>>builder()
+        return ApiResponse.<List<ProductResponse>>builder()
                 .content(page.getContent())
                 .page(page.getNumber())
                 .size(page.getSize())

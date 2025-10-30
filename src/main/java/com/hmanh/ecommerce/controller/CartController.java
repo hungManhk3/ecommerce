@@ -6,6 +6,7 @@ import com.hmanh.ecommerce.Entity.Product;
 import com.hmanh.ecommerce.Entity.User;
 import com.hmanh.ecommerce.dto.request.AddItemRequest;
 import com.hmanh.ecommerce.dto.response.ApiResponse;
+import com.hmanh.ecommerce.exception.ProductException;
 import com.hmanh.ecommerce.service.CartItemService;
 import com.hmanh.ecommerce.service.CartService;
 import com.hmanh.ecommerce.service.ProductService;
@@ -35,7 +36,7 @@ public class CartController {
     @PostMapping("/add")
     public ResponseEntity<CartItem> addItemToCart(@RequestHeader("Authorization") String jwt, @RequestBody AddItemRequest request) throws Exception {
         User user = userService.findUserByJwtToken(jwt);
-        Product product = productService.getProductById(request.getProductId());
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductException("product not found"));
 
         CartItem item = cartService.addCartItem(user,product,request.getSize(), request.getQuantity());
         ApiResponse response = new ApiResponse();
@@ -52,6 +53,7 @@ public class CartController {
         response.setMessage("Delete success");
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
+
     @PostMapping("/item/{cartItemId}")
     public ResponseEntity<CartItem> UpdateCartItemHandler(
             @RequestHeader("Authorization") String jwt,

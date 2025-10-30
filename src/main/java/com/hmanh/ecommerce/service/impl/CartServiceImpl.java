@@ -6,7 +6,6 @@ import com.hmanh.ecommerce.Entity.Product;
 import com.hmanh.ecommerce.Entity.User;
 import com.hmanh.ecommerce.repository.CartItemRepository;
 import com.hmanh.ecommerce.repository.CartRepository;
-import com.hmanh.ecommerce.repository.UserRepository;
 import com.hmanh.ecommerce.service.CartService;
 import com.hmanh.ecommerce.utils.Uitil;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +30,7 @@ public class CartServiceImpl implements CartService {
                     .userId(user.getId())
                     .sellingPrice(totalPrice)
                     .cart(cart)
+                    .mrpPrice(quantity*product.getMrqPrice())
                     .build();
             CartItem savedCartItem = cartItemRepository.save(cartItem);
             cart.getCartItems().add(savedCartItem);
@@ -39,7 +39,7 @@ public class CartServiceImpl implements CartService {
 
             return isExits;
         }
-        return null;
+        return isExits;
     }
 
     @Override

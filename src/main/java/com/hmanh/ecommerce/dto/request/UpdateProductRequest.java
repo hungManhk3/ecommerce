@@ -9,17 +9,18 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateProductRequest {
+public class UpdateProductRequest {
     private String title;
     private String description;
-    private int mrpPrice;
-    private int sellingPrice;
+    private Integer mrpPrice;
+    private Integer sellingPrice;
     private String color;
     private List<String> images;
     private String category;
     private String category2;
     private String category3;
-    private String sizes;
+    private List<String> sizes;
     private String brand;
-    private int quantity;
+    private Integer quantity;
+    private Boolean active;
 }
