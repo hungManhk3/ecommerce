@@ -5,6 +5,7 @@ import com.hmanh.ecommerce.convert.ConvertToResponse;
 import com.hmanh.ecommerce.domain.OrderStatus;
 import com.hmanh.ecommerce.domain.PaymentStatus;
 import com.hmanh.ecommerce.domain.USER_ROLE;
+import com.hmanh.ecommerce.dto.response.OrderItemResponse;
 import com.hmanh.ecommerce.dto.response.OrderResponse;
 import com.hmanh.ecommerce.exception.OrderNotFoundException;
 import com.hmanh.ecommerce.repository.*;
@@ -170,6 +171,12 @@ public class OrderServiceImpl implements OrderService {
         }
         Order cancelledOrder = orderRepository.save(order);
         return convertToResponse.convertToOrderResponse(cancelledOrder);
+    }
+
+    @Override
+    public OrderItemResponse findById(Long id) {
+        OrderItems orderItems = orderItemRepository.findById(id).orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + id));
+        return convertToResponse.convertToOrderItemResponse(orderItems);
     }
 
     private void clearCart(Cart cart) {

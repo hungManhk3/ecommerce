@@ -2,6 +2,7 @@ package com.hmanh.ecommerce.service;
 
 import com.hmanh.ecommerce.Entity.*;
 import com.hmanh.ecommerce.domain.OrderStatus;
+import com.hmanh.ecommerce.dto.response.OrderItemResponse;
 import com.hmanh.ecommerce.dto.response.OrderResponse;
 
 import java.util.List;
@@ -14,4 +15,5 @@ public interface OrderService {
     List<OrderResponse> sellerOrders(Long sellerId);
     OrderResponse updateOrderStatus(Long orderId, OrderStatus orderStatus);
     OrderResponse cancelOrder(Long orderId, User user);
+    OrderItemResponse findById(Long id);
 }

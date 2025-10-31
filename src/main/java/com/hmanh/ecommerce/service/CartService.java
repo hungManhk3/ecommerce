@@ -12,5 +12,6 @@ import com.hmanh.ecommerce.exception.ProductException;
 public interface CartService {
     CartItemResponse addCartItem(User user, AddItemRequest request) throws ProductException;
     CartResponse findUserCart(User user);
+    Cart findUserCart1(User user);
     Cart findProductCart(Product product);
 }

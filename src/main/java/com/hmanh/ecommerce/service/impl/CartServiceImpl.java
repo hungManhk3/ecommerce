@@ -62,6 +62,13 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public Cart findUserCart1(User user) {
+        Cart cart = cartRepository.findByUserId(user.getId()).orElseGet(() -> createNewCart(user));
+        updateCartTotals(cart);
+        return cart;
+    }
+
+    @Override
     public Cart findProductCart(Product product) {
         return null;
     }
