@@ -1,6 +1,7 @@
 package com.hmanh.ecommerce.controller;
 
 import com.hmanh.ecommerce.Entity.Seller;
+import com.hmanh.ecommerce.Entity.SellerReport;
 import com.hmanh.ecommerce.Entity.VerificationCode;
 import com.hmanh.ecommerce.domain.AccountStatus;
 import com.hmanh.ecommerce.dto.request.LoginRequest;
@@ -11,6 +12,7 @@ import com.hmanh.ecommerce.exception.SellerException;
 import com.hmanh.ecommerce.repository.VerificationCodeRepository;
 import com.hmanh.ecommerce.service.AuthService;
 import com.hmanh.ecommerce.service.EmailService;
+import com.hmanh.ecommerce.service.SellerReportService;
 import com.hmanh.ecommerce.service.SellerService;
 import com.hmanh.ecommerce.utils.OtpUtil;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class SellerController {
     private final VerificationCodeRepository verificationCodeRepository;
     private final AuthService authService;
     private final EmailService emailService;
+    private final SellerReportService sellerReportService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginSeller (@RequestBody LoginRequest request) throws Exception {
@@ -110,6 +113,13 @@ public class SellerController {
     public ResponseEntity<Void> deletedSeller(@PathVariable Long id) throws Exception {
         sellerService.deleteSeller(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/report")
+    public ResponseEntity<SellerReport> getSellerReport(@RequestHeader("Authorization") String jwt) throws Exception {
+        Seller seller = sellerService.getSellerProfile(jwt);
+        SellerReport  sellerReport = sellerReportService.getSellerReport(seller);
+        return ResponseEntity.ok(sellerReport);
     }
 
 }
