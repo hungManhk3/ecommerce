@@ -38,3 +38,21 @@ networks:
 volumes:
   postgres_data:
     driver: local
+
+# Cau hinh minio
+# nhan duoc file docker-compose.yml
+# b1: chay container minio, database
+# docker compose up -d
+# b2: tai 1 thu muc tai root project de luu config
+# mkdir mc-config
+# b3: Tạo alias MinIO đúng network
+# docker run --rm -it --network ecommerce_spring-demo -v ./mc-config:/root/.mc minio/mc alias set local http://minio:9000 minioadmin minioadmin123
+# b4: set public bucket
+# neu chu co bucket :
+# docker run --rm -it --network ecommerce_spring-demo -v ./mc-config:/root/.mc minio/mc mb local/ecommerce
+# sau khi da co bucket :
+# docker run --rm -it --network ecommerce_spring-demo -v ./mc-config:/root/.mc minio/mc anonymous set public local/ecommerce
+# b5: cho phep truy cap tu trinh duyet khac bat CORS
+# docker run --rm -it --network ecommerce_spring-demo -v D:\spring\Ecommerce\ecommerce\mc-config:/root/.mc minio/mc admin config set local api cors_allow_origin='*
+# docker restart minio
+# done
