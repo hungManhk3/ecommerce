@@ -135,6 +135,10 @@ public class ProductServiceImpl implements ProductService {
          Product product = productRepository.findById(productId).orElseThrow(() -> new ProductException("product not found"));
          return convertToResponse.convertToProductResponse(product);
     }
+    @Override
+    public Product getproductById(Long productId) throws ProductException {
+         return productRepository.findById(productId).orElseThrow(() -> new ProductException("product not found"));
+    }
 
     @Override
     public List<Product> getAllProducts(String query) {

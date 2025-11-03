@@ -17,6 +17,7 @@ public interface ProductService {
     void deleteProduct(Long productId) throws ProductException;
     ProductResponse updateProduct(Long productId, UpdateProductRequest request, Seller seller) throws ProductException;
     ProductResponse getProductById(Long productId) throws ProductException;
+    Product getproductById(Long productId) throws ProductException;
     List<Product> getAllProducts(String query);
     Page<ProductResponse> searchProducts(
             String category,
