@@ -2,6 +2,7 @@ package com.hmanh.ecommerce.service.impl;
 
 import com.hmanh.ecommerce.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,8 +15,10 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FileUploadServiceImpl implements FileUploadService {
@@ -56,5 +59,13 @@ public class FileUploadServiceImpl implements FileUploadService {
                 .build();
         s3Client.deleteObject(deleteObjectRequest);
         return true;
+    }
+
+    @Override
+    public List<String> uploadFiles(List<MultipartFile> files) {
+        return files.stream()
+                .filter(file -> file != null && !file.isEmpty())
+                .map(this::upload)
+                .collect(Collectors.toList());
     }
 }
